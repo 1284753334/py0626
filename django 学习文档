@@ -1,0 +1,338 @@
+模型的常见操作
+
+1. 保存数据
+
+    新建一个模型对象，res=Resource(),调用save方法
+        save  如果模型中主键不为None、且主键在表中存在，更新
+          主键 不存在，None   ，插入
+
+          save  更新 为全字段更新，不更新的字段，默认为空
+
+
+Django 在做数据加载的时候 采用的是 延迟加载 技术，
+        延迟加载：
+            当程序发送了一个查询语句、进行数据查询的时候、那么此时SQL
+            语句不会直接操作数据库、而是什么都不做， 当程序第一从查询结果的时候、此时才发送sql语句到数据库
+
+
+
+     模型.object.create() 来插入  如果主键存在，则不能执行新建动作
+
+        create 只具备新增功能、返回一个模型对象，如果在新增的时候主键存在，则插入失败
+
+
+      模型.objects.filte(id=2).update(name= "赵六")  更新记录
+        update 支持部分字段更新、里面传要更新的属性
+        update 在更新的时候，需要基于一个查询的结果
+        update 更新一个持久化的数据
+
+        3. 删除数据
+        模型对象.delete()
+
+        模型.objects.filte/get/all(id=2).delete()
+
+        4.查询
+        查询所有数据 : all  返回一个Queryset
+        User.objects.all()
+
+        带主键查询： get(id=5) /get(pk=5)
+        返回的是一个模型对象   参数应该是唯一属性
+
+        带条件查询
+        User.objects.filter(id=1)  返回一个Queryset
+          filter 可以返回多个对象
+
+          常见的关系查询
+
+          关系查询： 等于 小于  大于 大于等于 小于等于 不等于
+          = ： 直接用
+          >: id__gt=5    greate than
+          < ： id__lt=5   less than
+
+           <= ： id__lte=5
+
+            >= ： id__gte=5
+
+            不等于：execute    :(User.objects.all().exclude(id=3)
+
+        空值查询
+
+        User.objects.filter(username__isnull=True)
+
+        非空查询
+
+         user = User.objects.filter(id__isnull=False)
+         print(user)
+
+
+        in 查询   列表  非区间
+user = User.objects.filter(id__in=[4,7])
+    print(user)
+
+   区间(range)查询   between   and
+
+   模糊查询
+   user = User.objects.filter(username__contains= )
+   包含
+
+  __startwith  以什么开头
+
+   __endwith  以什么结尾
+
+   __icontains  不包含
+
+
+多条件查询  直接
+        And
+        user = User.objects.filter(A,B,C)
+        or
+        user = User.objects.filter(Q(A)|Q(B)|Q(C))
+
+        order_by('属性')  默认 升序
+         order_by('-属性')  默认 升序
+
+
+django聚合查询，及日志配置
+
+
+
+ 事务管理和装饰器
+ sql 注入 如果数据是从页面传过来的，不能直接使用，使用Parames
+
+
+   5 .分组查询 （mysql） group by  (django /mongodb) aggregate
+
+   6.聚合函数 Max()， Min() ，Avg() ， Sum() ， Count()
+
+        s = User.objects.aggregate (t=Count("username"))
+         print(s)
+
+
+       7 分组查询
+       # 分组
+    t=User.objects.annotate(Count('username'))
+    print(t)
+
+    8 指定查询的列
+
+ 表关系
+        用户 --资源（one--to--many）: 多的一方维护表关系。by 外键关联
+
+
+
+     9. 去重
+
+     distinct（field） 跟多个字段
+
+
+     10. 复杂的查询
+     1 . raw(sql,params)  仅支持查询
+
+     2.在django 中 直接获取数据库连接 connection
+        from django.db import connection
+        此时的connection可以直接使用
+
+
+
+   表关系
+   用户 - 资源  （one-to - many ）: 多的一方去维护关系、外键关联
+
+
+
+    数据库 ---事务管理
+    1 .事务概念
+    2.django 默认采用自动提交事务的行为、
+
+        在django 中实现事务管理：
+        1.在配置数据库源的时候、添加一个属性 ATOMIC REQUEST(了解)
+
+        2.在视图函数中 使用装饰器 @ transaction.atomic
+
+
+        3. 在web 开发过程中 只要含有增删改操作，必须提供 事务 管理
+
+
+  提交订单：
+
+  1. 生成订单表（id ，订单表，下单时间）
+
+
+  2. 生成订单时间（id ,订单号，商品名，商品价格，商品数量）
+
+  3. 生成订单配送表（id,收件人，收件地址，联系方式 用户id）
+            （生成订单配送表的时候，由于数据库或者其他原因、导致订单配送表生成失败）
+
+
+
+
+ 通过装饰器实现请求方式的限制
+
+    浏览器默认支持的请求方式是GET, 支持的请求方式是 post get
+
+    程序中 往往会有GET(获取数据)，POST(更新数据)，PUT(存储数据)，DELETE(删除数据)
+
+    不同语言 、例如 Java c# Python 、支持力度不一样
+
+    request_GET:标记请求方式 必须是 GET 请求
+    如果请求方式不正确、则响应405 状态码，代表请求方式不正确
+
+    200 ： ok  代表请求正常响应，但不代表程序业务正常
+
+    301： 永久重定向
+
+    302： 暂时重定向
+
+    404： 页面找不到（1. 模板页面找不到 2 指定的请求 找不到后天处理的view）
+
+    403; 禁止访问（防盗）
+
+    405： 请求方式不正确
+
+
+    406 请求参数不正确
+
+    500： 程序代码产生异常
+
+同步请求  异步请求
+
+    传统的web 开发、更多的是采用的同步请求，实现整个页面的刷新/跳转
+
+       异步请求：作用实现局部刷新、异步请求 返回的是数据 而非页面
+JaveScript 实现异步请求 ， json 技术
+
+    一个核心对象，三个方法、四个属性
+    1. javascript 中 异步请求的 核心  XMLHttpResponse
+
+    xhr = ....
+
+    2. 三个方法
+
+     xhr.open (method , url , anync ,)  async 默认是True 可以不传
+
+     xhr.setRequestHeader ("Content-Type","application/x-www-form-urlencoded")
+
+     xhr.send(params） 如果没有参数可以不传 或者 Null
+
+
+    3. 四个属性
+        xhr. onReadyStatechange=function(){
+
+       if ( xhr.readyStatus == 4  && xhr. status == 200){
+       // 获取响应结果
+
+       var data = xhr.responseText
+
+       //操作文档
+
+       }
+
+        }
+
+
+jQuery实现异步请求方式一、
+
+    $.ajax( {
+
+        url : '请求地址',
+
+        data: '请求参数、'  // 常见格式如下 "name=zhangsan&sex=男"  |   {name:"zhanfsan",sex:"男"}
+
+        type/method: '请求方式'   // 常见值 GET , POST， 默认值是GET
+
+        dataType : '响应类型'   // 默认值 text , 常用值  text,  json , jsonp , html
+
+        async : true ,  // 是否使用异步请求、默认true
+
+        success: function(data, status , xhr) {    //成功执行的代码
+            // data : 成功响应的内容
+            // xhr : 核心对象
+        },
+        error: function(xhr, status , err_msg) {  // 失败执行的代码
+
+        }
+    })
+
+    针对于 GET , POST 的两种异步请求方式
+
+        $.get(url, data , function(data){} ,  dataType ) ;
+
+            url : 代表请求的地址
+            data : 请求所需的参数 , 如果没有参数、可以不传
+            funciton(data) {...} 成功执行的代码,data代表 响应的内容
+            dataType : 响应的类型，默认是text
+
+        $.post(url, data, function(data) {},  dataType);
+
+针对 json 的异步请求方式
+        $.getJson(url , data , function(data){...})
+
+
+
+JavaScript 中的同源策略
+    http://www.baidu.com/s
+
+    http://localhost:8000/res/check
+
+        http://   HTTP协议
+
+        localhost :  IP地址 / 域名
+
+        8000 是端口号 ， 没有端口号的话，是省略了 80端口
+
+        /res/check  :  请求路径
+
+
+    域名/ip + 端口 必须完全相同 ，才能称之为同源
+
+如果 端口号或者 域名/IP 不同，并进行数据访问 、我们称这种行为 为  跨域
+
+
+JS 存在跨域问题、原因是 JS 遵循 同源策略的标准
+Python , Java 类型的服务器、不存在跨域的说法
+
+
+如果解决 跨域问题 ：
+
+    1、模拟 <script> 跨域 ， 不支持POST请求
+
+         把要跨域的请求、放在 <script> 标签
+
+         仅仅解决了发送请求、但是无法获取 后台响应的内容
+
+         后台响应的JSON格式的字符串、<script> 不识别
+         { 'msg': '用户名合法' , 'status':true}
+
+         要想让<script> 识别内容，只需要让响应的内容是一个 javascript 脚本即可
+
+         test(   )  :  有点像 调用 javascript 中的函数
+
+         test( { 'msg': '用户名合法' , 'status':true}  )  调用javascript 中 test有参的函数
+
+    2、基于<script>跨域手段的方式 、  jsonp
+        $.ajax({
+
+            url:'',
+            dataType:'jsonp'
+        })
+
+       服务器 必须支持 jsonp ,
+
+         服务器 返回一个   函数名(json) ， 函数名就是 jsonp 传递的callback 的参数值
+
+
+
+        3.
+
+
+
+
+
+
+
+
+
+
+
+
+
+

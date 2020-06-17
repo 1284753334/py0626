@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static  'css/index.css' %}"/>
+	<script src="{% static '/js/jquery-3.2.1.min.js' %}"></script>
+    <title>资源上传</title>
+</head>
+<body>
+    <div class="header">
+		<div class="lf">
+			<a href="index.html">首页</a>
+			<a  href="bbs.html">论坛</a>
+			<a href="upload.html">上传资料</a>
+		</div>
+		
+		<div class="rf">
+			<a href="personal.html">个人信息</a>
+			<a class="t" href="shoucang.html">我的收藏</a>
+			<a href="point.html">积分</a>
+			<a>退出登录</a>
+		</div>
+	</div>
+	<p></p>
+	<div></div>
+	
+    <!-- 网站主体 -->
+    <div id="main">
+        <!-- 上传表单-->
+        <div class="upload">
+            <p>上传资源</p>
+            <hr />
+            <form action="/res/upload" method="post" >
+                {% csrf_token %}
+                <span>
+                    <label>选择文件：</label>
+                    <input class="upt" type="text" readonly="readonly"/>
+                    <input class="upt" type="file" name="resource" value=""/>
+                    <b>文件格式可以是txt、pdf、zip、rar等后缀</b>
+                </span>
+                <span>
+                    <label>资源名称：</label>
+                    <input class="upt"  id="resourceName" type="text" name="resourceName" value="" />
+                    <b></b>
+                    <b></b>
+                </span>
+                <span>
+                    <label>资源类型：</label>
+                    <select class="upt"name = "resourceType">
+                        <option value="1">文本文件</option>
+                        <option value="2">电子文件</option>
+                        <option value="3">压缩文件</option>
+                    </select>
+                </span>
+                <span>
+                    <label>关键词：</label>
+                    <input class="upt" type="text" name="keywords" value="" onchange="check(this)"/>
+                    <b>多个关键词用空格分割,关键词不能超过5个</b>
+                </span>
+                <span>
+                    <label>资源分：</label>
+                    <select class="upt" id="sel"   name="Score">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                    </select>
+                </span>
+                <span class="d_span">
+                    <label>资源描述：</label>
+                    <textarea  class="area"   name = "resourceDesc" placeholder="描述不支持HTML标签；详细的资源描述有机会获得我们的推荐，更有利于他人下载，赚取更多积分。如资源描述不清，有可能审核不通过。"></textarea>
+                </span>
+                <span>
+                    <label class="agree">
+                        <input type="checkbox" name="" value="1" />
+                        同意爱下下资源上传协议
+                    </label>
+
+                </span>
+
+                <span><label class="btn"><input type="button" value="提交" /></label></span>
+            </form>
+        </div>
+        <!-- 公告 -->
+        <div class="advice">
+            <p class="title">上传协议</p>
+            <hr />
+            <p><span>*</span>如涉及侵权内容,您的资源将被移除</p>
+            <p><span>*</span>请勿上传小说、mp3、图片等与技术无关的内容.一旦发现将被删除</p>
+            <p><span>*</span>请勿在未经授权的情况下上传任何涉及著作权侵权的资源，除非该资源完全由您个人创作</p>
+            <p><span>*</span>点击上传资源即表示您确认该资源不违反资源分享的使用条款，并且您拥有该资源的所有版权或者上传资源的授权</p>
+        </div>
+    </div>
+
+    <script>
+
+
+        {#$("[type=button]").on('click', function() {#}
+        {##}
+        {#    // 做数据的校验#}
+        {##}
+        {#    $(this).parents("form").submit();#}
+       // {#})#}
+        $(function () {
+          $("[type=button]").on("click",function () {
+           //数据校验
+            $(this).parents("form").submit();
+       })
+
+            // 给id= resourceName 绑定事件
+            // javascript 绑定事件
+            // document.getElementById("resourceName").addEventListener()
+
+            //  Jquery 绑定事件
+            $("#resourceName").change(function () {
+                var tag= $(this);
+                // 获取资源名
+                let val = this.value;
+
+                // 通过异步请求 校验资源名是否可用
+                //1. 获取核心对象 XMLHttpResponse
+                var xhr= false;
+                try { xhr= new XMLHttpRequest()    // 不支持IE
+
+                }catch (e) {
+                    // IE 浏览q的创建方式
+                    xhr = new ActiveXObject("Microsoft.XMLHTTP")
+                }
+
+                // 2.通过 open 方法，打开一个和服务器的连接
+                xhr.open("GET","/res/check",true)
+
+                // 3.设置头信息、告诉 服务器采用那一种方式来提交表单 （key-value 基于文件上传）
+                xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded")
+
+                // 4.携带参数发送请求到服务器
+                xhr.send("name="+val) //参数以get 传参的方法 进行数据的传递 多个符号用 & 分割
+
+                //5. 设置监听器、监听服务器的动态
+                xhr.onreadystatechange = function () {
+
+                    // 6、 判断服务器和客户端的连接状态
+                    /**
+                     *  readytate 常见的五种状态
+                     *  0：（未初始化），但是已经创建了XHR实例
+                        1：（载入）调用了open()函数
+                        2：(载入完成）已经调用了send()函数，但还未收到服务器回应
+                        3：（交互）正在接受服务器返回的数据
+                        4：（完成）完成响应，可以在不客户端调用了
+                     *
+                     */
+                    if (xhr.readyState ==4){
+                        // 7. 判断服务器响应的状态码  status
+                        // xhr.status 可以参照状态码
+                        if(xhr.status== 200){
+
+                            //8. 获取响应的文本内容
+                            let data= xhr.responseText
+
+                            // 9. 操作 dom 元素、局部修改页面提示信息
+                            // 把 字符串 格式的 json 转成 json 对象
+                            data = JSON.parse(data)
+                            tag.next("b").html(data.msg)
+
+                        }
+
+
+
+                    }
+
+                }
+
+            })
+        })
+
+
+
+    </script>
+    
+</body>
+
+</html>
