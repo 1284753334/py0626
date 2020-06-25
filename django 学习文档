@@ -803,6 +803,21 @@ CSRF 跨站请求伪造（英语：Cross-site request forgery），也被称为 
         vcs--> git --> add
 
    并提交
+   vcs --- commit  提交后 颜色正常
+
+
+getblit 私服 搭建
+
+1. 解压文件到某个 具体 的盘符
+
+2. 打开 data/default  修改 1993  2020 行
+ 启动服务  win + r  services.msc
+打开 浏览器 输入 http://192.168.0.102:7900  打开 远程仓库的页面
+输入超级管理员账号 密码  admin  admin  进行的登录
+git remote add origin ssh://admin@192.168.0.102:29418/py1910.git
+是用来关联本地仓库和远程仓库的
+
+
 
 
 
