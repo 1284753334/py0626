@@ -18,6 +18,8 @@ class User(models.Model):
 
     sex =models.CharField(choices=sex_types,max_length=2)
     birth=models.DateField()
+    # 设置用户头像
+    photo = models.FileField(upload_to="./photo",blank=True)
 
     # 为了看到效果
     def __str__(self):
@@ -40,22 +42,26 @@ class Resource(models.Model):
 
     keywords = models.CharField(max_length=100)
 
-    Socre = models.IntegerField()
+    Socre = models.IntegerField(blank=True, verbose_name="积分")
 
-    resourceDesc = models.TextField(null=True)
+    resourceDesc = models.TextField(null=True,blank=True)
 
-    resourceTime = models.DateTimeField()
+    resourceTime = models.DateTimeField( blank= True)
 
-    resourceSize = models.IntegerField()
+    resourceSize = models.IntegerField(blank=True)
 
     # 资源，FileField对应的数据库字段也是一个字符串
-    resource = models.FileField()
-
+    resource = models.FileField(upload_to="./upload")
 
     # 上传者
+    # User = models.CharField
+
+    # 设置上传的类型
+    # content_type = models.CharField(max_length=30, blank=True, null=True)
+
 
     # 外键关联 表中维护一个字段。类中维护一个对象 默认和表中的id做关联，如果表中的主键做了改变，需要指定to_field
-    user = models.ForeignKey(to=User,on_delete=models.CASCADE,null=True)
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE,blank=True)
     def __str__(self):
         return f"resourceName:{self.resourceName},resourceType:{self.resourceType}"
 

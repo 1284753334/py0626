@@ -31,7 +31,7 @@
         <div class="upload">
             <p>上传资源</p>
             <hr />
-            <form action="/res/upload" method="post" >
+            <form action="/res/upload" method="post" enctype="multipart/form-data"  >
                 {% csrf_token %}
                 <span>
                     <label>选择文件：</label>
@@ -47,7 +47,7 @@
                 </span>
                 <span>
                     <label>资源类型：</label>
-                    <select class="upt"name = "resourceType">
+                    <select class="upt" name ="resourceType">
                         <option value="1">文本文件</option>
                         <option value="2">电子文件</option>
                         <option value="3">压缩文件</option>
@@ -60,7 +60,7 @@
                 </span>
                 <span>
                     <label>资源分：</label>
-                    <select class="upt" id="sel"   name="Score">
+                    <select class="upt" id="sel"   name="Socre">
                         <option value="0">0</option>
                         <option value="1">1</option>
                         <option value="2">2</option>

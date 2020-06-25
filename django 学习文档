@@ -324,6 +324,611 @@ Python , Java 类型的服务器、不存在跨域的说法
         3.
 
 
+      Django表单 （快速生成表单页面）
+
+        在某一个用中 、新建一个 forms.py
+         引入 from django.forms import forms
+         modelform 解决了多个参数接收非常麻烦的问题
+
+         form 解决页面参数、和参数校验、生成表单
+
+         Modelform ： 具备 Form的特点 、 具备ModelForm的特点
+
+         Form和 ModelForm  在使用的时候、都必须先调用  is_vaild()
+
+         Form 和 ModelForm 都有一个cleaned_data 属性，该属性以字典形式返回一个数据
+
+      ModelForm 实现 文件上传
+
+      1. html 对文件上传打的要求
+            1）、表单的提交方式  必须是 POST
+            2)、 表单必须提供 enctype = "multipart/form-data "
+
+        文件上传：  从浏览器（客户端） 把一个文件以流的形式 传递到后台的过程
+
+        客户端 和 服务器 不在同一个电脑上  ， 所以文件上传  不能使用 本地读取文件的方式进行操作
+
+        2. 使用ModelFrom 来接收文件上传的内容
+             1）， 要求 模型中，接收文件对象的属性 必须是 FileField , imageField  BinaryField
+              FieldField ： 针对所有的文件都可以使用、在数据库中 以 文件路径的方式存储数据  varchar
+              imageField :  针对图片存储的格式、在数据库中以 图片路径的格式 存储数据  varchar
+
+             BianryField； 把文件对象  直接 存储数据库中， 数据库对应的类型 是 longblob
+
+       3. views.py中 、 接收页面参数使用 ModelForm
+
+       mf = ModelForm(request.POST , request.Files)
+
+       ps: ModelForm 在使用的时候、注意表单没有提交的数据必须提供
+       blank=True, 设置为可为空，绕过is_vaild的校验
+
+
+       request.FILES(主要用来接收文件上传的File表单中的数据)
+       file = request.FILES.get("resource")
+        flie常见的属性
+        file.name 获取文件属性
+        file.size  获取文件大小
+        file.content_type: 获取上传的文件类型
+
+    设置文件上传的路径
+            文件默认上传到 项目的根目录下,在model  fileField 指定上传位置参数
+              例如： pohot = models.Model.FileField(upoad_to ="./upload")
+             会把文件上传到项目的 根目录下的 upload文件夹内
+
+    文件下载的实现
+            通过HttpResponse 实现即可
+
+            设置两个头信息;
+             Content-Type: 指定文件下载的类型
+                Content-Disposition: 指定下载的方式  下载 or 在线预览
+                attachment;filename=  a.doc  文件下载
+                inline；filename- 在线预览
+
+
+
+             设置 下载的文件名的时候
+
+             response["Content-Disposition"] = "attachment;filename="+urlquate(name)
+
+        会话技术：
+
+            cookie: 是在浏览器存储的一段  字符串，结构是一个键值对结构
+
+            设置 cookie: 通过响应的对象来进行设置， set_cookies
+            获取cookie: 通过请求对象 request.COOKIE  来获取
+
+
+            session: 是在服务器中、存储信息的、是基于用户的，可以存储复杂的数据结构 是一个 键值对  结构
+                键是一个字符串，值是一个object(任意类型)
+
+         获取session:  通过request来获取session
+
+            一般用户登录成功之后，都会在session 会话中，存储登录的标识，证明用户已经登录
+
+
+
+           session 的创建过程
+                        当用户使用session的时候。 服务器 会 读取浏览器中 cookie 的键 为sesssionid的  值
+                        如果  sessionid 不存在、则服务器 会自动创建一个新的 session对象，并把session 对象
+                        的ID 写入 到 浏览器 cookie 中， 以 sessionid 作为建
+
+                        如果 session 存在、则服务器通过 session 的键， 去查找对应的session，并把查询到的 session
+
+                        返回给用户。
+
+                    global_setting 全局配置文件
+
+                        session 的默认存活时间是 2  周，从设置开始 、中途不会因为
+                        用户操作而延长时间
+
+                    修改session 的存活时间
+
+                        session 中 常见的方法
+                        get(key):获取 session 中存储的内容
+
+                        set_expiry(val): 设置过期时间  s
+
+                            val 可以是 一个整数 、代表 多少秒后 过期
+                             如果是0，代表 浏览器 关闭，session 过期
+
+                             val 可以是一个时间对象，代表session指定时间后过期
+
+                             flash() 清空当前session  用作退出登录
+                             clear() 清除当前session
+                             clear_expired() 删除过期session
+
+                     session 的过期过期时间 优先级：
+
+                         1. global_settings.py 配置的是全局默认的 session 配置
+
+                         2. setting.py 配置文件配置的 session
+
+                         3. 通过 session.set_expiry()  设置过期时间
+
+                         优先级从哪个高到低是：
+                                3 ——> 2  --> 1
+
+
+        验证用户是否登录   使用 装饰器
+
+
+
+
+        分页查询
+            1. mysql 的分页  limit(start , pageSize  )
+                    limit 一个参数 pageSize
+
+            2 .网页分页需要具备的技能
+                    1. page (当前页)
+                    2. pageSize (每页显示多少条)
+                    3. totalPage (总页数)
+                    4. total(总条数)
+
+                总条数 是  可以通过 SQL 语句查询出来
+
+                总页数 =  Math.ceil(总条数  /  每页显示多少条 )
+
+                总页数= （总条数 - 1）//每页显示多少条  + 1
+
+                start= （page -1 ） * pageSize
+
+                end = page * pageSize
+
+    Django 实现分页：
+
+    引入插件 paginator(标记页码)
+    from django.core.paginator import Paginator
+
+    # 查询数据
+    list = User.objects.all()
+    # 将查询到的数据 放到分页对象中，并设置显示条数
+    P = Paginator(list,10)
+
+    # 获取当前要取第几页的数据
+    page = request.GET.get('page')
+    # 获取指定页面的数据
+    data = p.get_page(page)
+
+    # 将 data 发送到 模板 中
+
+    return   render (request,,"templateName",{"data":data})
+
+自定义 过滤器
+
+     1. 在应用中新建一个 templatestags 包
+
+     2. 在包里面 新建一个 模块 appName_extra.py
+
+     3.在文件里新建一个过滤器, 内置过滤器在defaultfilter 中。
+
+     可以通过 Ctrl+ N 快速找到
+
+    4 .# 自定义过滤器
+
+from django.template.library import Library
+from django.template.defaultfilters import stringfilter
+
+register = Library()
+
+# 加入 is_safe = True 支持HTML,识别标签
+@register.filter(is_safe = True)
+@stringfilter
+def get_ext(value):
+
+    index = value.rfind(".")
+
+    return value[index+1]
+
+
+    5.在setting中启用自定义过滤器
+
+    6 在模板中使用过滤器
+
+
+
+URL 反向解析
+
+    1.在path 上 、通过 name  来给 路由 设置 别名
+
+    2. 在模板中 使用 反向 解析  到 指定的 路由
+
+            {%  url "index"%}  index 就是 url path 中的name 值
+
+            如果 path 中 ，通过<int:key> 这种方式编码、那么
+                做反向解析的时候、需要设置参数
+
+                {% url "path"  params %} ,params 代表参数
+
+
+        路由 管理 ：
+                项目（py1905）路由
+
+                应用(resource)路由
+
+            在多个路由中、有可能在设置 path name=test 的时候、会产生名字冲突
+
+            {% url "upload" %}
+
+         此时可以在 每一个应用下的 url.py 中，添加应用名 app_name = "appName"
+
+         测试 在 模板中，使用 反向解析 的时候，需要添加 应用名
+
+         {% url "upload" "appName: index" %}
+
+
+     在视图中利用  反向解析
+
+
+
+    Django 配置 全站 缓存
+            以
+       一、引入 第三方 库  django_redis
+        pip3  install django_redis
+
+       二、在django  settings 中，启用缓存的支持
+
+            CACHES = {
+                'default': {
+                        'BACKEND': 'django_redis.cache.RedisCache',
+                        'LOCATION': [
+                            '127.0.0.1:6379',
+                                     ],
+                                "OPTIONS":{
+                                    "PASSWORD":"",
+                                            }
+
+                            }
+                        }
+        默认连接的redis 的第一个数据库
+        上述的location  可以更改为 "Locatin"："redis://127.0.0.1/6379/0"
+
+
+        三、在视图中 使用 Redis 缓存
+        1. 导入获取redis 的 对象
+        from django_redis import get_redis_connection
+
+
+     四、全站缓存：
+
+
+       MIDDLEWARE = [
+    'django.middleware.cache.UpdateCacheMiddleware',
+
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'django.middleware.cache.FetchFromCacheMiddleware',
+
+    ]
+
+
+    添加两个中间键  updat 必须位于首位， Fetch  位于最后一位。中间件是以相反顺序运行的，
+
+    五、对单个视图进行缓存
+    假如某个页面的缓存 不合理，可以对某个页面单独设置  方法 使用 装饰器
+      引入缓存的装饰器
+
+      from django.views.decorators.cache import cache_page
+
+        使用装饰器 设置 缓存30s
+        @cache_page(30)
+        @transaction.atomic
+        def index(request):
+            """
+
+
+
+{% csrf_token%}
+
+CSRF 跨站请求伪造（英语：Cross-site request forgery），也被称为 one-click attack 或者 session riding，通常缩写为 CSRF 或者 XSRF， 是一种挟制用户在当前已登录的Web应用程序上执行非本意的操作的攻击方法。跟跨网站脚本（XSS）相比，XSS 利用的是用户对指定网站的信任，CSRF 利用的是网站对用户网页浏览器的信任。
+
+网络常见的攻击：
+
+        XSS:  跨站脚本攻击
+        CSRF：跨站请求伪造
+        DDOC：  分布式拒绝服务攻击
+        SQL注入：
+
+
+自己编写令牌;
+    当用户 进入 表单页面的时候，服务器生成一个令牌（随机数），服务器存储到session会话中，
+
+    把 令牌 放到 表单 页面中
+    1、 产生一个随机数  uuid
+    2. 存储到session 中
+    3，把数据传到模板中
+    4、在表单中、做一个隐藏域 <Input type = "hidden" value = "令牌" name= "token" />
+
+ 提交表单的时候 需要验证令牌
+
+           当用户提交令牌的时候、需要把令牌和需要传递的参数一同提交到服务器中
+       服务器会获取令牌 并和 session 中存储的令牌比较，如果不一致，则抛出403，
+       如果一致、则 允许 提交表单 、并同时删除sesson中的令牌
+
+       1、 request.POST.get("token")
+       2.和session 中的令牌作比较
+       3. 如果比较一致、则删除session 中的令牌，
+       4，如果不一致、则响应一个403 状态码
+
+如果表单很多，都这样写，会造成 表单冗余，可以把这段逻辑 写到装饰器 中
+
+
+项目上线准备：
+        在setting文件中 ，DeBug=True
+
+
+            DEBUG = True
+
+            ALLOWED_HOSTS = [linux 的 ip 地址]
+
+            数据库的连接  不要用LocalHost,也不能使用 127.0.0.1 除非数据库在linux 主机上
+
+            时区的调整
+
+            LANGUAGE_CODE = 'zh-hans'
+
+            TIME_ZONE = 'Asia/Shanghai'
+
+            USE_I18N = True
+
+            USE_L10N = True
+
+            USE_TZ = False
+    2. 把项目放到 Linux 指定目录
+        Alt +  P    通过put 上传 项目文件
+
+        上传 虚拟环境
+
+
+
+
+    3. 配置 uwsgi  它本身是 web服务器
+
+    pycharm 自动配好了，在settings. wsgi.py  中
+
+
+
+
+    4， 启动 uwsgi
+
+            启动方式
+            uwsgi --ini ~app/py1905/uwsgi.ini
+
+
+     5 、安装Nginx
+
+     sudo apt install nginx
+
+     查看 Nginx 是否启动
+         sudo  -ef| grep nginx
+     查看nginx 的位置
+
+     sudo find /  -name nginx
+
+     nginx 位置
+         1 、启动命令 位置： /usr/sbin/nginx
+         2、 配置文件位置 ： /etc/nginx/nginx.conf
+         3. 日志文件   ： /var/log/nginx
+
+
+      查看nginx 是否启动成功
+        win
+
+       打开 浏览器 http://192.168.88.140: 80 (浏览器ip,端口号，默认80 )
+
+        linux
+
+            http://192.168.88.140
+
+
+     修改nginx的配置 文件
+
+        sudo vim /etc/nginx/nginx.conf
+
+        http{
+             server / {
+
+                    uwsgi_pass 127.0.0.1:8000; #(liunx主机IP；端口号)
+                    include uwsgi_params;
+             }
+
+        }
+
+
+        验证配置文件是否有语法错误
+
+        sudo nginx -t
+        重启 nginx
+         sudo nginx  -s reload
+
+
+
+      Django 中的静态资源、在开发模式下可以正常使用， 放到Nginx 中 ，则会失效
+
+      Nginx 处理静态资源，让程序实现动静分离
+
+      配置动静分离的代码如下， 修改 niinx.conf
+
+        http{
+             server / {
+
+                    uwsgi_pass 127.0.0.1:8000; #(liunx主机IP；端口号)
+                    include uwsgi_params;
+             }
+             # 处理静态资源
+             location /static / {
+                alias  /home/penhgui/app/py1905/static/ :
+
+               }
+
+
+        }
+
+
+        常见为题:
+            1. 如果静态资源中 css  javascript 出现问题、而图片正常、
+            这种情况 一般是 css js 下载导致的不识别问题
+
+            解决方案 ：
+                    在nginx.conf 下 ，添加 include mine.types
+
+                    在 处理静态资源的位置上 进行后缀的判断 ， 针对
+                    不同的资源 、 设置不同的响应的头信息
+
+            nginx 实现防盗链
+
+
+       常见的版本控制工具
+        vss
+        cvs
+        svn
+
+        GIT   分布式 分支 管理工具
+
+        # 可以多次提交，它会覆盖
+        git config  --global user.name  "penghui"
+        git config  --global user.email "1233@163.com"
+
+        git  init  初始化一个仓库
+
+        git add 文件 ， 把文件交给git 来管理
+
+        git commit - m  "修复首页乱码"
+
+        # 创建仓库
+        vcs -->import into Version Control ——- create git Repository
+        # 在项目中、添加一个 .gitignore 配置文件，可以在里面配置不需要上传的代码
+
+
+        把项目 中的代码 提交到 版本控制工具中
+        vcs--> git --> add
+
+   并提交
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

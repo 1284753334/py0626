@@ -16,12 +16,17 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path,include
-from . import views
+from .import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('<slug:path>', views.path),
-    url(r'^$', views.index),
-    path("res/",include("resource.urls")),
+    path('login', views.login),
+    path('exist', views.exist),
+    path('show', views.get_photo),
+    url(r'^$', views.index,name= "index"), # 首页
+    path("res/", include("resource.urls")),
+    path("user/", include("user.urls")),
+    path('<slug:path>', views.path,name = "path"),
+
 
 ]
