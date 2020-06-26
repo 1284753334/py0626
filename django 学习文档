@@ -817,6 +817,23 @@ getblit 私服 搭建
 git remote add origin ssh://admin@192.168.0.102:29418/py1910.git
 是用来关联本地仓库和远程仓库的
 
+添加 git 免密操作
+ssh-keygen -t rsa -C "xiaomin@169.com"
+
+邮箱是 git 分配的邮箱
+去 c /user/.ssh pub 找到公钥  去云端  粘贴 实现 免密操作
+
+代码 第一次上传的时候 ， 默认是 master 分支
+组长 同时 创建 一个 新的分支 用来做代码开发
+
+可以让组员进行代码的下载、
+组员需要点击 切换 远程分支  切换到可以写代码的分支上
+
+所有的代码 、都是在非master 分支上进行的
+
+master : 可以上线的代码、才允许放到 master 上
+
+
 
 
 
